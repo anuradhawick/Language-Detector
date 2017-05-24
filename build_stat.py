@@ -87,13 +87,13 @@ def letterCount(word):
     return True
 
 
-initialData = sys.argv
+initialParams = sys.argv
 
-if len(initialData) != 3:
+if len(initialParams) != 3:
     print "Use python build_stat.py <LANGUAGE DATA> <TARGET DATA>"
 else:
-    targetFilename = initialData[2]
-    dataFilename = initialData[1]
+    targetFilename = initialParams[2]
+    dataFilename = initialParams[1]
 
     # Initializing stat data
     initializeStats()
@@ -101,9 +101,9 @@ else:
     # Excecute algorithm
     readData(dataFilename)
     with open(targetFilename, 'wb') as f:
-        f.writelines("totalLetters: " + str(totalLetters))
-        f.writelines("\nletterCounts: " + str(letterCounts))
-        f.writelines("\ncvCount: " + str(cvCount))
-        f.writelines("\ncvvCount: " + str(cvvCount))
-        f.writelines("\ncvcvvCount: " + str(cvcvvCount))
+        f.writelines("totalLetters- " + str(totalLetters))
+        f.writelines("\nletterCounts- " + str(letterCounts))
+        f.writelines("\ncvCount- " + str(cvCount))
+        f.writelines("\ncvvCount- " + str(cvvCount))
+        f.writelines("\ncvcvvCount- " + str(cvcvvCount))
     # Write information on to a file
