@@ -94,7 +94,7 @@ initializeStats()
 initialData = sys.argv
 print initialData
 if len(initialData) != 4:
-    print "Use python detector.py <LANGUAGE DATA> <TARGET DATA>"
+    print "Use python build_stat.py <LANGUAGE DATA> <TARGET DATA>"
 else:
     targetFilename = initialData[2]
     dataFilename = initialData[1]
