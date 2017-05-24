@@ -88,7 +88,7 @@ def calculateError():
 initialParams = sys.argv
 
 if len(initialParams) != 4:
-    print "Use python build_stat.py <TARGET STATS> <SINHALA STATS> <TAMIL STATS>"
+    print "Use python detector.py <TARGET STATS> <SINHALA STATS> <TAMIL STATS>"
 else:
     targetStats = initialParams[1]
     sinhalaStats = initialParams[2]
