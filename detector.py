@@ -1,4 +1,5 @@
 import sys
+import string
 
 statSinhala = {}
 statTamil = {}
@@ -12,10 +13,11 @@ cvcvvCountStatsSinhala = {'cv': {}, 'cvv': {}, 'letters': {}}
 cvcvvCountStatsTamil = {'cv': {}, 'cvv': {}, 'letters': {}}
 cvcvvCountStatsTarget = {'cv': {}, 'cvv': {}, 'letters': {}}
 error = False
-def calculateDistributions(sinhala, tamil, target):
-    global cvcvvCountStatsSinhala, cvcvvCountStatsTamil, cvcvvCountStatsTarget
 
-    with open(sinhala, 'r') as f:
+
+def calculateDistributionForStats(statsFile, statsData, cvcvvCountStats):
+
+    with open(statsFile, 'r') as f:
         data = [line.strip() for line in f]
         totalLetters = eval(data[0].split('-')[1].strip())
         letterCounts = eval(data[1].split('-')[1].strip())
@@ -23,70 +25,27 @@ def calculateDistributions(sinhala, tamil, target):
         cvvCount = eval(data[3].split('-')[1].strip())
         cvcvvCount = eval(data[4].split('-')[1].strip())
 
-        statSinhala['totalLetters']  = totalLetters
-        statSinhala['letterCounts']  = letterCounts
-        statSinhala['cvCount']  = cvCount
-        statSinhala['cvvCount']  = cvvCount
-        statSinhala['cvcvvCount']  = cvcvvCount
+        statsData['totalLetters']  = totalLetters
+        statsData['letterCounts']  = letterCounts
+        statsData['cvCount']  = cvCount
+        statsData['cvvCount']  = cvvCount
+        statsData['cvcvvCount']  = cvcvvCount
 
         # Updating sinhala stats
         for key, value in cvcvvCount['cv'].iteritems():
-            cvcvvCountStatsSinhala['cv'][key] = float(value)/cvCount
+            cvcvvCountStats['cv'][key] = float(value)/cvCount
         
         for key, value in cvcvvCount['cvv'].iteritems():
-            cvcvvCountStatsSinhala['cvv'][key] = float(value)/cvvCount
+            cvcvvCountStats['cvv'][key] = float(value)/cvvCount
         
         for key, value in letterCounts.iteritems():
-            cvcvvCountStatsSinhala['letters'][key] = float(value)/totalLetters
+            cvcvvCountStats['letters'][key] = float(value)/totalLetters
 
-    with open(tamil, 'r') as f:
-        data = [line.strip() for line in f]
-        totalLetters = eval(data[0].split('-')[1].strip())
-        letterCounts = eval(data[1].split('-')[1].strip())
-        cvCount = eval(data[2].split('-')[1].strip())
-        cvvCount = eval(data[3].split('-')[1].strip())
-        cvcvvCount = eval(data[4].split('-')[1].strip())
 
-        statTamil['totalLetters']  = totalLetters
-        statTamil['letterCounts']  = letterCounts
-        statTamil['cvCount']  = cvCount
-        statTamil['cvvCount']  = cvvCount
-        statTamil['cvcvvCount']  = cvcvvCount
-
-        # Updating tamil stats
-        for key, value in cvcvvCount['cv'].iteritems():
-            cvcvvCountStatsTamil['cv'][key] = float(value)/cvCount
-        
-        for key, value in cvcvvCount['cvv'].iteritems():
-            cvcvvCountStatsTamil['cvv'][key] = float(value)/cvvCount
-        
-        for key, value in letterCounts.iteritems():
-            cvcvvCountStatsTamil['letters'][key] = float(value)/totalLetters
-
-    with open(target, 'r') as f:
-        data = [line.strip() for line in f]
-        totalLetters = eval(data[0].split('-')[1].strip())
-        letterCounts = eval(data[1].split('-')[1].strip())
-        cvCount = eval(data[2].split('-')[1].strip())
-        cvvCount = eval(data[3].split('-')[1].strip())
-        cvcvvCount = eval(data[4].split('-')[1].strip())
-
-        statTarget['totalLetters']  = totalLetters
-        statTarget['letterCounts']  = letterCounts
-        statTarget['cvCount']  = cvCount
-        statTarget['cvvCount']  = cvvCount
-        statTarget['cvcvvCount']  = cvcvvCount
-
-        # Updating target stats
-        for key, value in cvcvvCount['cv'].iteritems():
-            cvcvvCountStatsTarget['cv'][key] = float(value)/cvCount
-        
-        for key, value in cvcvvCount['cvv'].iteritems():
-            cvcvvCountStatsTarget['cvv'][key] = float(value)/cvvCount
-        
-        for key, value in letterCounts.iteritems():
-            cvcvvCountStatsTarget['letters'][key] = float(value)/totalLetters
-
+def calculateDistributions(sinhala, tamil, target):
+    calculateDistributionForStats(sinhala, statSinhala, cvcvvCountStatsSinhala)
+    calculateDistributionForStats(tamil, statTamil, cvcvvCountStatsTamil)
+    calculateDistributionForStats(target, statTarget, cvcvvCountStatsTarget)
 
 def calculateError():
     global cvcvvCountStatsSinhala, cvcvvCountStatsTamil, cvcvvCountStatsTarget, meanAbsoluteError
@@ -101,6 +60,33 @@ def calculateError():
     for key, value in cvcvvCountStatsTarget['letters'].iteritems():
         meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['letters'][key] - cvcvvCountStatsTarget['letters'][key])
         meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['letters'][key] - cvcvvCountStatsTarget['letters'][key])
+
+
+# Update the model stats again using detected language file stats
+def updateModel(statsModel, statsNew):
+    # Updating sinhala stats
+    statsModel['totalLetters']  += statsNew['totalLetters']
+
+    for key, value in statsNew['letterCounts'].iteritems():
+        statsModel['letterCounts'][key] += value
+
+    statsModel['cvCount']  += statsNew['cvCount']
+    statsModel['cvvCount']  += statsNew['cvvCount']
+    
+    for key, value in statsNew['cvcvvCount']['cv'].iteritems():
+        statsModel['cvcvvCount']['cv'][key] += value
+    
+    for key, value in statsNew['cvcvvCount']['cvv'].iteritems():
+        statsModel['cvcvvCount']['cvv'][key] += value
+    
+    with open(sinhalaStats, 'wb') as f:
+        f.writelines("totalLetters- " + str(statsModel['totalLetters']))
+        f.writelines("\nletterCounts- " + str(statsModel['letterCounts']))
+        f.writelines("\ncvCount- " + str(statsModel['cvCount']))
+        f.writelines("\ncvvCount- " + str(statsModel['cvvCount']))
+        f.writelines("\ncvcvvCount- " + str(statsModel['cvcvvCount']))
+
+    print("Model updated using new target file")
 
 
 initialParams = sys.argv
@@ -134,51 +120,9 @@ else:
 
 if not error:
     print 'Was the prediction true and you need to update the stats? (Y/N) [N]'
-    if raw_input() == 'Y':
+    if raw_input().lower() == 'y':
         if detectedLanguage == 'SINHALA':
-            # Updating sinhala stats
-            statSinhala['totalLetters']  += statTarget['totalLetters']
-
-            for key, value in statTarget['letterCounts'].iteritems():
-                statSinhala['letterCounts'][key] += value
-
-            statSinhala['cvCount']  += statTarget['cvCount']
-            statSinhala['cvvCount']  += statTarget['cvvCount']
-            
-            for key, value in statTarget['cvcvvCount']['cv'].iteritems():
-                statSinhala['cvcvvCount']['cv'][key] += value
-            
-            for key, value in statTarget['cvcvvCount']['cvv'].iteritems():
-                statSinhala['cvcvvCount']['cvv'][key] += value
-            
-            with open(sinhalaStats, 'wb') as f:
-                f.writelines("totalLetters- " + str(statSinhala['totalLetters']))
-                f.writelines("\nletterCounts- " + str(statSinhala['letterCounts']))
-                f.writelines("\ncvCount- " + str(statSinhala['cvCount']))
-                f.writelines("\ncvvCount- " + str(statSinhala['cvvCount']))
-                f.writelines("\ncvcvvCount- " + str(statSinhala['cvcvvCount']))
+            updateModel(statSinhala, statTarget)
 
         elif detectedLanguage == 'TAMIL':
-            # Updating tamil statis
-            statTamil['totalLetters']  += statTarget['totalLetters']
-
-            for key, value in statTarget['letterCounts'].iteritems():
-                statTamil['letterCounts'][key] += value
-
-            statTamil['cvCount']  += statTarget['cvCount']
-            statTamil['cvvCount']  += statTarget['cvvCount']
-            
-            for key, value in statTarget['cvcvvCount']['cv'].iteritems():
-                statTamil['cvcvvCount']['cv'][key] += value
-            
-            for key, value in statTarget['cvcvvCount']['cvv'].iteritems():
-                statTamil['cvcvvCount']['cvv'][key] += value
-            
-            with open(tamilStats, 'wb') as f:
-                f.writelines("totalLetters- " + str(statTamil['totalLetters']))
-                f.writelines("\nletterCounts- " + str(statTamil['letterCounts']))
-                f.writelines("\ncvCount- " + str(statTamil['cvCount']))
-                f.writelines("\ncvvCount- " + str(statTamil['cvvCount']))
-                f.writelines("\ncvcvvCount- " + str(statTamil['cvcvvCount']))
-        print 'Updated the language library'
-    
+            updateModel(statTamil, statTarget)
