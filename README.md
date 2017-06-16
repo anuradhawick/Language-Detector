@@ -1,5 +1,9 @@
 # Language Classifier
 ### Training process
+#### Pre-requistites 
+Install the library to read unicode
+
+`$ pip install chardet`
 #### Inputs
 `$ python build_stat.py <LANGUAGE DATA> <TARGET DATA>`
 * `<LANGUAGE DATA>` for training the model
