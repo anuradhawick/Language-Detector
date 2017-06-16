@@ -1,5 +1,7 @@
 import string
 import sys
+import codecs
+import chardet
 
 # Meta Data
 data = []
@@ -31,8 +33,34 @@ def initializeStats():
                 cvvCount += 1
 
 
+def identifyEncoding(fileName):
+    rawdata = open(fileName, 'rb').read()
+    result = chardet.detect(rawdata)
+    charenc = result['encoding']
+    if charenc == "ascii":
+        readASCIIData(fileName)
+    elif charenc[0:5] == "UTF-8":
+        readUnicodeData(fileName)
+    else:
+        print charenc+" encoded file. Not able to decode"
+    
+
+
+def readUnicodeData(fileName):
+    f = codecs.open(fileName, "r", encoding='utf-8')
+    for line in f:
+        data = ' '.join([l.strip() for l in line.split()])
+        # Cleaning data
+        dataArray = data.strip().split()
+        detect(dataArray)
+        for word in dataArray:
+            detect(word)
+
+    f.close()
+    print('Sinhala or Tamil not present')
+        
 # Reading data and obtaining the array of data
-def readData(fileName):
+def readASCIIData(fileName):
     global totalLetters
     print "Operation Started!!"
     with open (fileName, "r") as f:
@@ -55,6 +83,16 @@ def readData(fileName):
 
             # return dataArray
 
+# Detect Sinhala or Tamil or any other language using unicode
+def detect(word):
+    if u'\u0d80' <= word <= u'\u0dff':
+        print('Sinhala language detected')
+        sys.exit()
+    elif u'\u0b80' <= word <= u'\u0bff':
+        print ('Tamil language detected')
+        sys.exit()
+  
+  
 # Get the set if CV set for a word
 def cvSet(word):
     global vSet, cSet, cvCount
@@ -99,7 +137,7 @@ else:
     initializeStats()
     print 'Initialized stat data'
     # Excecute algorithm
-    readData(dataFilename)
+    identifyEncoding(dataFilename)
     with open(targetFilename, 'wb') as f:
         f.writelines("totalLetters- " + str(totalLetters))
         f.writelines("\nletterCounts- " + str(letterCounts))
