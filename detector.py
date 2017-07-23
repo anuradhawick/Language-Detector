@@ -6,6 +6,9 @@ statTamil = {}
 statTarget = {}
 
 meanAbsoluteError = {'sinhala': 0, 'tamil': 0}
+letterTolerance = 0.1
+cvTolerance = 0.01
+cvvTolerance = 0.001
 
 detectedLanguage = ''
 
@@ -31,14 +34,14 @@ def calculateDistributionForStats(statsFile, statsData, cvcvvCountStats):
         statsData['cvvCount']  = cvvCount
         statsData['cvcvvCount']  = cvcvvCount
 
-        # Updating sinhala stats
-        for key, value in cvcvvCount['cv'].iteritems():
+        # Updating stats
+        for key, value in cvcvvCount['cv'].items():
             cvcvvCountStats['cv'][key] = float(value)/cvCount
         
-        for key, value in cvcvvCount['cvv'].iteritems():
+        for key, value in cvcvvCount['cvv'].items():
             cvcvvCountStats['cvv'][key] = float(value)/cvvCount
         
-        for key, value in letterCounts.iteritems():
+        for key, value in letterCounts.items():
             cvcvvCountStats['letters'][key] = float(value)/totalLetters
 
 
@@ -49,15 +52,15 @@ def calculateDistributions(sinhala, tamil, target):
 
 def calculateError():
     global cvcvvCountStatsSinhala, cvcvvCountStatsTamil, cvcvvCountStatsTarget, meanAbsoluteError
-    for key, value in cvcvvCountStatsTarget['cv'].iteritems():
+    for key, value in cvcvvCountStatsTarget['cv'].items():
         meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['cv'][key] - cvcvvCountStatsTarget['cv'][key])
         meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['cv'][key] - cvcvvCountStatsTarget['cv'][key])
     
-    for key, value in cvcvvCountStatsTarget['cvv'].iteritems():
+    for key, value in cvcvvCountStatsTarget['cvv'].items():
         meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['cvv'][key] - cvcvvCountStatsTarget['cvv'][key])
         meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['cvv'][key] - cvcvvCountStatsTarget['cvv'][key])
     
-    for key, value in cvcvvCountStatsTarget['letters'].iteritems():
+    for key, value in cvcvvCountStatsTarget['letters'].items():
         meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['letters'][key] - cvcvvCountStatsTarget['letters'][key])
         meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['letters'][key] - cvcvvCountStatsTarget['letters'][key])
 
@@ -67,16 +70,16 @@ def updateModel(statsModel, statsNew):
     # Updating sinhala stats
     statsModel['totalLetters']  += statsNew['totalLetters']
 
-    for key, value in statsNew['letterCounts'].iteritems():
+    for key, value in statsNew['letterCounts'].items():
         statsModel['letterCounts'][key] += value
 
     statsModel['cvCount']  += statsNew['cvCount']
     statsModel['cvvCount']  += statsNew['cvvCount']
     
-    for key, value in statsNew['cvcvvCount']['cv'].iteritems():
+    for key, value in statsNew['cvcvvCount']['cv'].items():
         statsModel['cvcvvCount']['cv'][key] += value
     
-    for key, value in statsNew['cvcvvCount']['cvv'].iteritems():
+    for key, value in statsNew['cvcvvCount']['cvv'].items():
         statsModel['cvcvvCount']['cvv'][key] += value
     
     with open(sinhalaStats, 'wb') as f:
@@ -96,7 +99,7 @@ sinhalaStats = ''
 tamilStats = ''
 
 if len(initialParams) != 4:
-    print "Use python detector.py <TARGET STATS> <SINHALA STATS> <TAMIL STATS>"
+    print("Use python detector.py <TARGET STATS> <SINHALA STATS> <TAMIL STATS>")
     error = True
 else:
     targetStats = initialParams[1]
@@ -107,20 +110,20 @@ else:
     calculateError()
     
     if meanAbsoluteError['sinhala'] < meanAbsoluteError['tamil']:
-        print 'Language detected: SINHALA'
-        print 'MAE: ' + str(meanAbsoluteError['sinhala']) + ' < ' + str(meanAbsoluteError['tamil'])
+        print('Language detected: SINHALA')
+        print('MAE: ' + str(meanAbsoluteError['sinhala']) + ' < ' + str(meanAbsoluteError['tamil']))
         detectedLanguage = 'SINHALA'
     elif meanAbsoluteError['sinhala'] > meanAbsoluteError['tamil']:
-        print 'Language detected: TAMIL'
-        print 'MAE: ' + str(meanAbsoluteError['tamil']) + ' < ' + str(meanAbsoluteError['sinhala'])
+        print('Language detected: TAMIL')
+        print('MAE: ' + str(meanAbsoluteError['tamil']) + ' < ' + str(meanAbsoluteError['sinhala']))
         detectedLanguage = 'TAMIL'
     else:
         error = True
-        print 'Language detection failed, please provide a larger data set for training/testing'
+        print('Language detection failed, please provide a larger data set for training/testing')
 
 if not error:
-    print 'Was the prediction true and you need to update the stats? (Y/N) [N]'
-    if raw_input().lower() == 'y':
+    print('Was the prediction true and you need to update the stats? (Y/N) [N]')
+    if input().lower() == 'y':
         if detectedLanguage == 'SINHALA':
             updateModel(statSinhala, statTarget)
 
