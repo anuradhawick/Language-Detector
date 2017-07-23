@@ -6,9 +6,9 @@ statTamil = {}
 statTarget = {}
 
 meanAbsoluteError = {'sinhala': 0, 'tamil': 0}
-letterTolerance = 0.1
+letterTolerance = 0.01
 cvTolerance = 0.01
-cvvTolerance = 0.001
+cvvTolerance = 0.02
 
 detectedLanguage = ''
 
@@ -53,16 +53,19 @@ def calculateDistributions(sinhala, tamil, target):
 def calculateError():
     global cvcvvCountStatsSinhala, cvcvvCountStatsTamil, cvcvvCountStatsTarget, meanAbsoluteError
     for key, value in cvcvvCountStatsTarget['cv'].items():
-        meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['cv'][key] - cvcvvCountStatsTarget['cv'][key])
-        meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['cv'][key] - cvcvvCountStatsTarget['cv'][key])
+        if abs(cvcvvCountStatsSinhala['cv'][key]-cvcvvCountStatsTamil['cv'][key]) > cvTolerance:
+            meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['cv'][key] - cvcvvCountStatsTarget['cv'][key])
+            meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['cv'][key] - cvcvvCountStatsTarget['cv'][key])
     
     for key, value in cvcvvCountStatsTarget['cvv'].items():
-        meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['cvv'][key] - cvcvvCountStatsTarget['cvv'][key])
-        meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['cvv'][key] - cvcvvCountStatsTarget['cvv'][key])
+        if abs(cvcvvCountStatsSinhala['cvv'][key]-cvcvvCountStatsTamil['cvv'][key]) > cvvTolerance:
+            meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['cvv'][key] - cvcvvCountStatsTarget['cvv'][key])
+            meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['cvv'][key] - cvcvvCountStatsTarget['cvv'][key])
     
     for key, value in cvcvvCountStatsTarget['letters'].items():
-        meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['letters'][key] - cvcvvCountStatsTarget['letters'][key])
-        meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['letters'][key] - cvcvvCountStatsTarget['letters'][key])
+        if abs(cvcvvCountStatsSinhala['letters'][key]-cvcvvCountStatsTamil['letters'][key]) > letterTolerance:
+            meanAbsoluteError['sinhala'] += abs(cvcvvCountStatsSinhala['letters'][key] - cvcvvCountStatsTarget['letters'][key])
+            meanAbsoluteError['tamil'] += abs(cvcvvCountStatsTamil['letters'][key] - cvcvvCountStatsTarget['letters'][key])
 
 
 # Update the model stats again using detected language file stats
