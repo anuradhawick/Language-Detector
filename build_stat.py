@@ -42,7 +42,7 @@ def identifyEncoding(fileName):
     elif charenc[0:5] == "UTF-8":
         readUnicodeData(fileName)
     else:
-        print charenc+" encoded file. Not able to decode"
+        print(charenc+" encoded file. Not able to decode")
     
 
 
@@ -62,12 +62,13 @@ def readUnicodeData(fileName):
 # Reading data and obtaining the array of data
 def readASCIIData(fileName):
     global totalLetters
-    print "Operation Started!!"
+    print("Operation Started!!")
     with open (fileName, "r") as f:
         for line in f:
             data = ' '.join([l.strip() for l in line.split()])
             # Cleaning data
-            data = data.translate(string.maketrans("",""), string.punctuation)
+            table = str.maketrans("","", string.punctuation)
+            data = data.translate(table)
             dataArray = data.strip().split()
 
             # Exectute data generation for each word
@@ -78,7 +79,7 @@ def readASCIIData(fileName):
                 cvSet(word)
                 cvvSet(word)
                 letterCount(word)
-    print "Operation Completed!!"
+    print("Operation Completed!!")
             
 
             # return dataArray
@@ -89,7 +90,7 @@ def detect(word):
         print('Sinhala language detected')
         sys.exit()
     elif u'\u0b80' <= word <= u'\u0bff':
-        print ('Tamil language detected')
+        print('Tamil language detected')
         sys.exit()
   
   
@@ -128,20 +129,20 @@ def letterCount(word):
 initialParams = sys.argv
 
 if len(initialParams) != 3:
-    print "Use python build_stat.py <LANGUAGE DATA> <TARGET DATA>"
+    print("Use python build_stat.py <LANGUAGE DATA> <TARGET DATA>")
 else:
     targetFilename = initialParams[2]
     dataFilename = initialParams[1]
 
     # Initializing stat data
     initializeStats()
-    print 'Initialized stat data'
+    print("Initialized stat data")
     # Excecute algorithm
     identifyEncoding(dataFilename)
-    with open(targetFilename, 'wb') as f:
+    with open(targetFilename, 'w') as f:
         f.writelines("totalLetters- " + str(totalLetters))
         f.writelines("\nletterCounts- " + str(letterCounts))
         f.writelines("\ncvCount- " + str(cvCount))
         f.writelines("\ncvvCount- " + str(cvvCount))
         f.writelines("\ncvcvvCount- " + str(cvcvvCount))
-    # Write information on to a file
+
