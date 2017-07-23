@@ -32,6 +32,7 @@ Install the matplotlib to read unicode
 `$ pip3 install matplotlib`
 #### Inputs
 `$ cd stat_analysis`
+
 `$ python3 plotter.py`
 
 #### Process
