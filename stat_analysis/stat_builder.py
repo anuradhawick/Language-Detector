@@ -1,6 +1,3 @@
-cvcvvCountStatsSinhala = {'cv': {}, 'cvv': {}, 'letters': {}}
-cvcvvCountStatsTamil = {'cv': {}, 'cvv': {}, 'letters': {}}
-
 statSinhala = {}
 statTamil = {}
 
